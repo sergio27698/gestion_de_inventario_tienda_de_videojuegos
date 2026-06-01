@@ -153,7 +153,7 @@ while True:
     elif r == "usuario":
         usuario_actual = None
         print("\n--- ACCESO DE USUARIOS ---")
-        print("1. Iniciar Sesion o como Invitado(User:invitado ; Conraseña:55555)")
+        print("1. Iniciar Sesion o como Invitado(User:invitado ; Contraseña:55555)")
         print("2. Registrar nuevo usuario")
         opc_usuario = input("Seleccione una opcion: ").strip()
 
