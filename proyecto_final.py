@@ -8,6 +8,8 @@ inventario = [
     {"titulo": "Minecraft",      "precio_usd": 20.0, "stock": 15},
 ]
 usuarios_registrados = {"invitado": "55555"}
+registro_ventas = []
+
 def mostrar_catalogo():
     print("\n==================================================")
     print("               CATALOGO DE JUEGOS                ")
@@ -16,9 +18,23 @@ def mostrar_catalogo():
         precio_bs = juego["precio_usd"] * tipo_cambio_bs
         print(f"{i}. {juego['titulo']} | ${juego['precio_usd']:.2f} USD ({precio_bs:.2f} Bs) | Stock: {juego['stock']}")
     print("==================================================")
+
 def restaurar_stock(carrito):
     for item in carrito:
         inventario[item["indice_original"]]["stock"] += item["cantidad"]
+
+def mostrar_registro_ventas():
+    print("\n========== REGISTRO DE VENTAS ==========")
+    if not registro_ventas:
+        print("  No hay ventas registradas aun.")
+    else:
+        for i, venta in enumerate(registro_ventas, 1):
+            print(f"\n  Venta #{i} | Usuario: {venta['usuario']}")
+            for item in venta["items"]:
+                print(f"    - {item['titulo']} x{item['cantidad']}  ->  ${item['subtotal_usd']:.2f} USD  ({item['subtotal']:.2f} Bs)")
+            print(f"    TOTAL PAGADO: {venta['total_bs']:.2f} Bs (${venta['total_usd']:.2f} USD) | Cambio: {venta['cambio_bs']:.2f} Bs")
+    print("=========================================")
+
 def despedida():
     print("""
   +-----------------------------------------+
@@ -32,22 +48,24 @@ def despedida():
   |    Hasta luego   Game Zone              |
   +-----------------------------------------+
     """)
+
 print("""
 ============
 [GAME ZONE]
 ============
 """)
+
 while True:
     r = ""
     while r not in ("admin", "usuario", "salir"):
         r = input("Ingresar como Admin, Usuario o Salir: ").strip().lower()
         if r not in ("admin", "usuario", "salir"):
             print("Error. Escribe Admin, Usuario o Salir.")
-            
+
     if r == "salir":
         despedida()
         break
-        
+
     elif r == "admin":
         acceso = False
         while not acceso:
@@ -57,7 +75,7 @@ while True:
                 acceso = True
             else:
                 print("Pin incorrecto. Intente de nuevo.")
-                
+
         while True:
             print(f"\n--- PANEL DE ADMINISTRACION | Tasa: {tipo_cambio_bs} Bs/USD ---")
             print("1. Ver catalogo actual")
@@ -65,18 +83,26 @@ while True:
             print("3. Eliminar un juego")
             print("4. Modificar stock de un juego")
             print("5. Actualizar tipo de cambio")
-            print("6. Salir al menu principal")
+            print("6. Ver registro de ventas")
+            print("7. Salir al menu principal")
             opc_admin = input("Seleccione una opcion: ").strip()
-            
+
             if opc_admin == "1":
                 mostrar_catalogo()
-                
+
             elif opc_admin == "2":
                 nuevo_titulo = input("Nombre del videojuego: ").strip()
                 if not nuevo_titulo:
                     print("Error: El nombre no puede estar vacio.")
                     continue
-                
+
+                nuevo_titulo = nuevo_titulo.title()
+
+                titulos_existentes = [j["titulo"].lower() for j in inventario]
+                if nuevo_titulo.lower() in titulos_existentes:
+                    print(f"Error: '{nuevo_titulo}' ya existe en el catalogo.")
+                    continue
+
                 nuevo_precio = float(input("Precio en USD: "))
                 nuevo_stock  = int(input("Stock inicial: "))
                 if nuevo_precio <= 0 or nuevo_stock < 0:
@@ -84,7 +110,7 @@ while True:
                 else:
                     inventario.append({"titulo": nuevo_titulo, "precio_usd": nuevo_precio, "stock": nuevo_stock})
                     print(f"'{nuevo_titulo}' añadido.")
-                        
+
             elif opc_admin == "3":
                 mostrar_catalogo()
                 indice = int(input("Numero del juego a eliminar: ")) - 1
@@ -93,7 +119,7 @@ while True:
                     print(f"'{eliminado['titulo']}' eliminado.")
                 else:
                     print("Numero no valido.")
-                        
+
             elif opc_admin == "4":
                 mostrar_catalogo()
                 indice = int(input("Numero del juego para modificar stock: ")) - 1
@@ -106,7 +132,7 @@ while True:
                         print("Stock actualizado.")
                 else:
                     print("Numero no valido.")
-                        
+
             elif opc_admin == "5":
                 nueva_tasa = float(input("Nueva tasa en Bs: "))
                 if nueva_tasa <= 0:
@@ -114,20 +140,23 @@ while True:
                 else:
                     tipo_cambio_bs = nueva_tasa
                     print(f"Tasa actualizada a {tipo_cambio_bs}.")
-                        
+
             elif opc_admin == "6":
+                mostrar_registro_ventas()
+
+            elif opc_admin == "7":
                 print("Cerrando sesion de administrador...")
                 break
             else:
                 print("Opcion no valida.")
-                
+
     elif r == "usuario":
         usuario_actual = None
         print("\n--- ACCESO DE USUARIOS ---")
-        print("1. Iniciar Sesion o como Invitado(User:invitado ; Conraseña:55555)")
+        print("1. Iniciar Sesion o como Invitado(User:invitado ; Contraseña:55555)")
         print("2. Registrar nuevo usuario")
         opc_usuario = input("Seleccione una opcion: ").strip()
-        
+
         if opc_usuario == "2":
             print("\n--- REGISTRO ---")
             while True:
@@ -150,7 +179,7 @@ while True:
                         break
             usuarios_registrados[nuevo_usuario] = nueva_contrasena
             print(f"\nRegistro exitoso! Ahora inicia sesion.")
-            
+
         print("\n--- INICIO DE SESION ---")
         intentos = 3
         while intentos > 0:
@@ -163,43 +192,47 @@ while True:
             else:
                 intentos -= 1
                 print(f"Datos incorrectos. Intentos restantes: {intentos}")
-                
+
         if usuario_actual is None:
             print("Demasiados intentos fallidos. Volviendo al inicio.")
             continue
-            
+
         print(f"\n=================================\n[Bienvenido, {usuario_actual}!]\n=================================")
         carrito = []
         total_a_pagar_bs = 0.0
-        
+
         while True:
             mostrar_catalogo()
             seleccion = int(input("\nIntroduce el numero del juego (o 0 para salir): ")) - 1
             if seleccion == -1:
                 break
-                
+
             if 0 <= seleccion < len(inventario):
                 juego_elegido = inventario[seleccion]
                 if juego_elegido["stock"] > 0:
                     cantidad = int(input(f"Cuantas copias? (Stock: {juego_elegido['stock']}): "))
                     if 0 < cantidad <= juego_elegido["stock"]:
-                        subtotal = juego_elegido["precio_usd"] * tipo_cambio_bs * cantidad
+                        subtotal     = juego_elegido["precio_usd"] * tipo_cambio_bs * cantidad
+                        subtotal_usd = juego_elegido["precio_usd"] * cantidad
                         en_carrito = next((item for item in carrito if item["indice_original"] == seleccion), None)
                         if en_carrito:
-                            en_carrito["cantidad"] += cantidad
-                            en_carrito["subtotal"] += subtotal
+                            en_carrito["cantidad"]     += cantidad
+                            en_carrito["subtotal"]     += subtotal
+                            en_carrito["subtotal_usd"] += subtotal_usd
                         else:
                             carrito.append({
                                 "titulo":          juego_elegido["titulo"],
                                 "cantidad":        cantidad,
                                 "subtotal":        subtotal,
+                                "subtotal_usd":    subtotal_usd,
                                 "indice_original": seleccion,
                             })
                         total_a_pagar_bs       += subtotal
+                        total_a_pagar_usd       = sum(item["subtotal_usd"] for item in carrito)
                         juego_elegido["stock"] -= cantidad
-                        print(f"\nAñadido! Total acumulado: {total_a_pagar_bs:.2f} Bs.")
-                        
-                        if input("Seguir comprando? (Si/No): ").strip().lower() != "Si":
+                        print(f"\nAñadido! Total acumulado: ${total_a_pagar_usd:.2f} USD  ({total_a_pagar_bs:.2f} Bs).")
+
+                        if input("Seguir comprando? (Si/No): ").strip().lower() != "si":
                             break
                     else:
                         print("Stock insuficiente o cantidad invalida.")
@@ -207,22 +240,52 @@ while True:
                     print("Juego agotado.")
             else:
                 print("Numero de juego no valido.")
-                
+
         if carrito:
+            total_usd = sum(item["subtotal_usd"] for item in carrito)
             print("\n========== RESUMEN DE COMPRA ==========")
             for item in carrito:
-                print(f"  {item['titulo']} x{item['cantidad']}  ->  {item['subtotal']:.2f} Bs")
-            print(f"  TOTAL: {total_a_pagar_bs:.2f} Bs")
+                print(f"  {item['titulo']} x{item['cantidad']}  ->  ${item['subtotal_usd']:.2f} USD  ({item['subtotal']:.2f} Bs)")
+            print(f"  TOTAL: ${total_usd:.2f} USD  ({total_a_pagar_bs:.2f} Bs)")
             print("========================================")
-            
-            pago_str = input("Ingresa el monto a pagar en Bs (o escribe cancelar): ").strip().lower()
+
+            moneda = ""
+            while moneda not in ("bs", "usd"):
+                moneda = input("Pagar en (Bs/USD): ").strip().lower()
+                if moneda not in ("bs", "usd"):
+                    print("Escribe Bs o USD.")
+
+            pago_str = input(f"Ingresa el monto en {'Bs' if moneda == 'bs' else 'USD'} (o escribe cancelar): ").strip().lower()
             if pago_str == "cancelar":
                 restaurar_stock(carrito)
                 print("Compra cancelada. Stock restaurado.")
             else:
-                pago = float(pago_str)
-                if pago >= total_a_pagar_bs:
-                    print(f"\n  Cambio: {pago - total_a_pagar_bs:.2f} Bs.")
+                pago_ingresado = float(pago_str)
+                pago_en_bs = pago_ingresado if moneda == "bs" else pago_ingresado * tipo_cambio_bs
+
+                if pago_en_bs >= total_a_pagar_bs:
+                    cambio_bs  = pago_en_bs - total_a_pagar_bs
+                    cambio_usd = cambio_bs / tipo_cambio_bs
+                    print("\n========== RESUMEN DE PAGO ==========")
+                    for item in carrito:
+                        print(f"  {item['titulo']} x{item['cantidad']}  ->  ${item['subtotal_usd']:.2f} USD  ({item['subtotal']:.2f} Bs)")
+                    print(f"  TOTAL:          ${total_usd:.2f} USD  ({total_a_pagar_bs:.2f} Bs)")
+                    if moneda == "bs":
+                        print(f"  MONTO PAGADO:   {pago_ingresado:.2f} Bs")
+                        print(f"  CAMBIO:         {cambio_bs:.2f} Bs  (${cambio_usd:.2f} USD)")
+                    else:
+                        print(f"  MONTO PAGADO:   ${pago_ingresado:.2f} USD  ({pago_en_bs:.2f} Bs)")
+                        print(f"  CAMBIO:         ${cambio_usd:.2f} USD  ({cambio_bs:.2f} Bs)")
+                    print("=======================================")
+
+                    registro_ventas.append({
+                        "usuario":   usuario_actual,
+                        "items":     carrito,
+                        "total_bs":  total_a_pagar_bs,
+                        "total_usd": total_usd,
+                        "cambio_bs": cambio_bs,
+                    })
+
                     print("""
   +-----------------------------------------+
   |                                         |
@@ -240,4 +303,4 @@ while True:
                     restaurar_stock(carrito)
                     print("Saldo insuficiente. Compra cancelada y stock restaurado.")
         else:
-            print("\nGracias por visitarnos.")
+            print("\nGracias por visitarnos")
