@@ -145,7 +145,7 @@ while True:
                 mostrar_registro_ventas()
 
             elif opc_admin == "7":
-                print("Cerrando sesion de administrador...")
+                print("Cerrando sesion de administrador")
                 break
             else:
                 print("Opcion no valida.")
@@ -303,4 +303,4 @@ while True:
                     restaurar_stock(carrito)
                     print("Saldo insuficiente. Compra cancelada y stock restaurado.")
         else:
-            print("\nGracias por visitarnos")
+            print("\nGracias por visitarnos.")
