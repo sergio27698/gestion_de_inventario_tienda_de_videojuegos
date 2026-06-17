@@ -98,7 +98,37 @@ while True:
 
                 nuevo_titulo = nuevo_titulo.title()
 
-                titulos_existentes = [j["titulo"].lower() for j in inventario]
+      usuario = input("Ingrese el usuario: ")
+while usuario.strip().lower() != "fin":
+    usuario = input("Ingrese el usuario: ")
+
+        comentario_invalido = True
+while comentario_invalido:
+    comentario = input("Ingresa un comentario sobre el producto: ")
+    if "malo" in comentario.lower():
+        print("Tu comentario no cumple con las normas, intenta de nuevo.")
+    else:
+        print("Comentario publicado con éxito.")
+        comentario_invalido = False
+        
+        frase = input("Ingresa una frase: ")
+if "triste" in frase.lower():
+    print(frase.lower().replace("triste", "feliz"))
+else:
+    print(frase.upper())
+
+contrasena = input("Ingresa una contraseña: ")
+insegura = True
+
+while insegura:
+    if contrasena.strip() == "12345":
+        contrasena = input("Contraseña insegura, ingresa otra: ")
+    else:
+        insegura = False
+
+print("Acceso concedido")
+
+  titulos_existentes = [j["titulo"].lower() for j in inventario]
                 if nuevo_titulo.lower() in titulos_existentes:
                     print(f"Error: '{nuevo_titulo}' ya existe en el catalogo.")
                     continue
