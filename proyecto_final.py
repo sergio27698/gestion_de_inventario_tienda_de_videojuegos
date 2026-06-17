@@ -98,35 +98,49 @@ while True:
 
                 nuevo_titulo = nuevo_titulo.title()
 
-      usuario = input("Ingrese el usuario: ")
-while usuario.strip().lower() != "fin":
-    usuario = input("Ingrese el usuario: ")
+      # ==========================================
+# EJERCICIO 1: Bucle de autenticación
+# ==========================================
+while True:
+    usuario = input("Ingrese el usuario: ").strip()
+    if usuario.lower() == "fin":
+        break
 
-        comentario_invalido = True
-while comentario_invalido:
+
+# ==========================================
+# EJERCICIO 2: Validación de comentarios
+# ==========================================
+while True:
     comentario = input("Ingresa un comentario sobre el producto: ")
     if "malo" in comentario.lower():
         print("Tu comentario no cumple con las normas, intenta de nuevo.")
     else:
         print("Comentario publicado con éxito.")
-        comentario_invalido = False
-        
-        frase = input("Ingresa una frase: ")
+        break
+
+
+# ==========================================
+# EJERCICIO 3: Editor de texto automático
+# ==========================================
+frase = input("Ingresa una frase: ")
 if "triste" in frase.lower():
     print(frase.lower().replace("triste", "feliz"))
 else:
     print(frase.upper())
 
-contrasena = input("Ingresa una contraseña: ")
-insegura = True
 
-while insegura:
+# ==========================================
+# EJERCICIO 4: Filtro de seguridad (While + If)
+# ==========================================
+contrasena = input("Ingresa una contraseña: ")
+
+while True:
     if contrasena.strip() == "12345":
         contrasena = input("Contraseña insegura, ingresa otra: ")
     else:
-        insegura = False
+        print("Acceso concedido")
+        break
 
-print("Acceso concedido")
 
   titulos_existentes = [j["titulo"].lower() for j in inventario]
                 if nuevo_titulo.lower() in titulos_existentes:
